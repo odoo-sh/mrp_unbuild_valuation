@@ -3,4 +3,4 @@
 
 from . import stock_move
 from . import mrp_unbuild
-from . import stock_valuation_layer
+from . import product
