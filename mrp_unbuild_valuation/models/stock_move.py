@@ -36,15 +36,18 @@ class StockMove(models.Model):
         self.ensure_one()
         # If the move is an unbuild move, use the original move's price unit.
         if (
-            self.created_from_mo_move_id
+            'svl_move' in self.env.context
+            and self.created_from_mo_move_id
             and self.created_from_mo_move_id.sudo().stock_valuation_layer_ids
         ):
             layers = self.created_from_mo_move_id.sudo().stock_valuation_layer_ids
             quantity = sum(layers.mapped("quantity"))
+            rounding = layers and layers[0].uom_id.rounding
+            currency = layers and layers[0].currency_id
             return (
-                layers.currency_id.round(sum(layers.mapped("value")) / quantity)
+                currency.round(sum(layers.mapped("value")) / quantity)
                 if not float_is_zero(
-                    quantity, precision_rounding=layers.uom_id.rounding
+                    quantity, precision_rounding=rounding
                 )
                 else 0
             )
